@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bhumika Gaur — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lato:wght@300;400;700&family=Dancing+Script:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0f0810;--rose:#e8718a;--rose-bright:#ff9db3;--rose-pale:#f7cfd8;
+  --gold:#d4a0b0;--blush:#f2c4ce;--mauve:#7b3f5e;--deep:#2a0f1e;
+  --lavender:#c8a0d8;--lavender-bright:#e0c0f0;
+  --text:#f0e0ea;--muted:#c0a0b0;--card:#18091a;--card2:#1e0c1c;
+  --border:#4a1f38;--border-bright:#9b5070;--electric:#ff6b9d;--cream:#fff0f5;
+  --nav-w:160px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+*{cursor:none!important;}
+
+/* ── CURSOR ── */
+#cur{position:fixed;pointer-events:none;z-index:99999;width:20px;height:20px;transform:translate(-50%,-50%);transition:transform .08s;}
+#cur svg{width:100%;height:100%;}
+#trail{position:fixed;pointer-events:none;z-index:99998;width:44px;height:44px;border:1.5px solid rgba(232,113,138,.55);border-radius:50%;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s,border-radius .3s,opacity .3s;}
+
+/* ── CANVAS LAYERS ── */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#petal-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;}
+
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;overflow-x:hidden;}
+
+/* ── NAVBAR (vertical pill strip) ── */
+#float-nav{
+  position:fixed;right:18px;top:50%;transform:translateY(-50%);
+  z-index:1000;display:flex;flex-direction:column;gap:4px;
+  background:rgba(15,8,16,.72);border:1px solid var(--border);
+  border-radius:24px;padding:10px 8px;backdrop-filter:blur(22px);
+  box-shadow:0 0 40px rgba(232,113,138,.08),inset 0 0 20px rgba(232,113,138,.03);
+  transition:box-shadow .4s;
+}
+#float-nav:hover{box-shadow:0 0 60px rgba(232,113,138,.18),inset 0 0 20px rgba(232,113,138,.06);}
+.nav-dot{
+  position:relative;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);text-decoration:none;
+  transition:all .35s;font-size:13px;
+}
+.nav-dot::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  background:transparent;border:1px solid transparent;
+  transition:all .35s;
+}
+.nav-dot:hover::before,.nav-dot.active::before{
+  background:rgba(232,113,138,.18);border-color:var(--rose);
+}
+.nav-dot .nav-label{
+  position:absolute;right:42px;
+  background:rgba(15,8,16,.95);border:1px solid var(--border);
+  color:var(--rose-bright);font-family:'Lato',sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  padding:4px 12px;border-radius:20px;white-space:nowrap;
+  opacity:0;pointer-events:none;transform:translateX(8px);
+  transition:opacity .25s,transform .25s;
+  box-shadow:0 0 16px rgba(232,113,138,.2);
+}
+.nav-dot:hover .nav-label,.nav-dot.active .nav-label{opacity:1;transform:translateX(0);}
+.nav-dot span.icon{font-size:12px;filter:drop-shadow(0 0 4px rgba(232,113,138,.4));}
+.nav-dot.active span.icon{filter:drop-shadow(0 0 8px rgba(255,157,179,.9));}
+.nav-pip{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(200,160,216,.25);
+  position:absolute;right:-18px;top:50%;transform:translateY(-50%);
+  transition:all .35s;
+}
+.nav-dot.active .nav-pip{background:var(--rose-bright);box-shadow:0 0 8px var(--rose);}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 20px;position:relative;z-index:2;}
+.hero-wrapper{animation:bloomIn 2s cubic-bezier(.16,1,.3,1) forwards;opacity:0;}
+@keyframes bloomIn{
+  0%{opacity:0;transform:scale(.88) translateY(40px);filter:blur(18px) brightness(2);}
+  40%{filter:blur(2px) brightness(1.4);}
+  70%{transform:scale(1.02) translateY(-8px);opacity:1;}
+  85%{transform:scale(.99) translateY(3px);}
+  100%{opacity:1;transform:scale(1) translateY(0);filter:brightness(1);}
+}
+
+/* PHOTO FRAME */
+.photo-frame{width:170px;height:170px;border-radius:50%;margin:0 auto 30px;position:relative;animation:bloomIn 2s .2s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transition:transform .5s;}
+.photo-frame:hover{transform:scale(1.07);}
+.photo-frame::before{content:'';position:absolute;inset:-5px;border-radius:50%;background:conic-gradient(var(--rose),var(--lavender),var(--rose-bright),var(--blush),var(--rose));animation:spinRing 5s linear infinite;z-index:-1;}
+.photo-frame::after{content:'';position:absolute;inset:-10px;border-radius:50%;background:conic-gradient(transparent 60%,rgba(232,113,138,.35) 80%,transparent 100%);animation:spinRing 8s linear infinite reverse;z-index:-2;}
+@keyframes spinRing{to{transform:rotate(360deg);}}
+.photo-inner{width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,var(--deep),var(--mauve) 50%,var(--card2));border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;transition:all .5s;}
+.photo-placeholder{font-size:68px;line-height:1;filter:drop-shadow(0 0 20px rgba(232,113,138,.6));}
+
+/* Magnetic rings on hover */
+.ring1,.ring2,.ring3{position:absolute;border-radius:50%;pointer-events:none;border:1px solid rgba(232,113,138,0);transition:all .6s;opacity:0;}
+.photo-frame:hover .ring1{inset:-14px;border-color:rgba(232,113,138,.5);opacity:1;animation:pulseRing 2s infinite;}
+.photo-frame:hover .ring2{inset:-22px;border-color:rgba(200,160,216,.35);opacity:1;animation:pulseRing 2s .3s infinite;}
+.photo-frame:hover .ring3{inset:-32px;border-color:rgba(255,157,179,.2);opacity:1;animation:pulseRing 2s .6s infinite;}
+@keyframes pulseRing{0%,100%{opacity:.8;transform:scale(1);}50%{opacity:.3;transform:scale(1.04);}}
+
+.photo-glow{position:absolute;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(232,113,138,.3) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:pulseGlow 3s ease-in-out infinite;pointer-events:none;}
+@keyframes pulseGlow{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.25);}}
+
+.hero-tag{font-family:'Dancing Script',cursive;font-size:1.25rem;color:var(--rose-bright);margin-bottom:16px;opacity:0;animation:bloomIn 1.8s .4s cubic-bezier(.16,1,.3,1) forwards;letter-spacing:.05em;text-shadow:0 0 20px rgba(255,157,179,.4);}
+.hero-name{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,9vw,6rem);font-weight:900;line-height:1.08;background:linear-gradient(135deg,#fff 0%,var(--rose-pale) 30%,var(--rose-bright) 55%,var(--lavender-bright) 80%,#fff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 50px rgba(232,113,138,.5));position:relative;}
+.hero-name span{display:block;font-family:'Dancing Script',cursive;font-size:clamp(1rem,3vw,1.6rem);font-weight:700;background:linear-gradient(90deg,var(--lavender-bright),var(--rose-bright));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:10px;letter-spacing:.08em;}
+.hero-title{margin-top:18px;font-family:'Cormorant Garamond',serif;font-size:clamp(1.05rem,2.4vw,1.38rem);color:#e8d0e0;font-weight:400;font-style:italic;letter-spacing:.1em;text-shadow:0 1px 8px rgba(0,0,0,.5);}
+.hero-cta{margin-top:38px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
+
+.btn-primary{
+  padding:14px 38px;background:linear-gradient(135deg,var(--mauve),var(--rose),var(--rose-bright));
+  background-size:200% 200%;animation:gradShift 4s ease infinite;
+  color:#fff;font-family:'Lato',sans-serif;font-weight:700;font-size:13px;
+  border-radius:30px;text-decoration:none;letter-spacing:.18em;text-transform:uppercase;
+  box-shadow:0 0 40px rgba(232,113,138,.55),0 4px 20px rgba(0,0,0,.4);
+  transition:all .35s;position:relative;overflow:hidden;border:none;
+}
+@keyframes gradShift{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+.btn-primary::before{content:'';position:absolute;top:-50%;left:-60%;width:35%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transform:skewX(-20deg);transition:left .55s;}
+.btn-primary:hover::before{left:130%;}
+.btn-primary:hover{box-shadow:0 0 80px rgba(255,157,179,.75),0 4px 30px rgba(0,0,0,.5);transform:translateY(-4px) scale(1.04);}
+.btn-ghost{padding:14px 38px;background:transparent;color:var(--lavender-bright);font-family:'Lato',sans-serif;font-weight:700;font-size:13px;border:1.5px solid var(--lavender);border-radius:30px;text-decoration:none;letter-spacing:.18em;text-transform:uppercase;transition:all .35s;position:relative;overflow:hidden;}
+.btn-ghost::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,160,216,.15),rgba(232,113,138,.1));opacity:0;transition:opacity .35s;border-radius:30px;}
+.btn-ghost:hover::before{opacity:1;}
+.btn-ghost:hover{box-shadow:0 0 35px rgba(200,160,216,.35);transform:translateY(-4px);border-color:var(--lavender-bright);}
+
+.scroll-hint{position:absolute;bottom:38px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:10px;letter-spacing:.25em;font-weight:700;text-transform:uppercase;opacity:0;animation:bloomIn 1.5s 2.2s ease forwards;}
+.scroll-line{width:1px;height:50px;background:linear-gradient(to bottom,var(--rose),transparent);animation:scrollPulse 2s infinite;}
+@keyframes scrollPulse{0%,100%{opacity:1;}50%{opacity:.1;}}
+
+/* ── SECTIONS ── */
+section{position:relative;z-index:2;padding:90px 20px;max-width:940px;margin:0 auto;}
+
+/* REVEAL ANIMATIONS */
+.reveal{opacity:0;transform:translateY(60px) scale(.97);transition:opacity .9s ease,transform .9s ease;}
+.reveal.visible{opacity:1;transform:translateY(0) scale(1);}
+.reveal-left{opacity:0;transform:translateX(-60px);transition:opacity .9s ease,transform .9s ease;}
+.reveal-left.visible{opacity:1;transform:translateX(0);}
+.reveal-right{opacity:0;transform:translateX(60px);transition:opacity .9s ease,transform .9s ease;}
+.reveal-right.visible{opacity:1;transform:translateX(0);}
+.reveal-scale{opacity:0;transform:scale(.88);transition:opacity .8s ease,transform .8s ease;}
+.reveal-scale.visible{opacity:1;transform:scale(1);}
+/* Staggered children */
+.stagger-child{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease;}
+.stagger-child.visible{opacity:1;transform:translateY(0);}
+
+/* SECTION HEADERS */
+.section-label{font-family:'Dancing Script',cursive;font-size:1.05rem;color:var(--rose-bright);margin-bottom:8px;text-shadow:0 0 15px rgba(255,157,179,.4);}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,4vw,2.4rem);font-weight:700;background:linear-gradient(90deg,#fff 0%,var(--rose-pale) 50%,var(--lavender-bright) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:36px;line-height:1.3;}
+.divider{width:80px;height:2px;background:linear-gradient(to right,var(--rose),var(--lavender),transparent);margin-bottom:38px;border-radius:2px;position:relative;}
+.divider::before{content:'✿';position:absolute;left:84px;top:-9px;font-size:18px;color:var(--rose);animation:flowerSpin 6s linear infinite;filter:drop-shadow(0 0 5px var(--rose));}
+@keyframes flowerSpin{to{transform:rotate(360deg);}}
+
+/* ── CARDS — MAGNETIC PUSH + GLOW ── */
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:18px;
+  padding:30px 32px;margin-bottom:18px;
+  transition:box-shadow .45s,border-color .45s;
+  position:relative;overflow:hidden;
+  will-change:transform;
+  transform-style:preserve-3d;
+}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--rose),var(--lavender),transparent);opacity:0;transition:opacity .4s;}
+.card::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at var(--mx,50%) var(--my,0%),rgba(232,113,138,.12),transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none;}
+.card:hover::before{opacity:1;}
+.card:hover::after{opacity:1;}
+.card:hover{border-color:rgba(232,113,138,.6);box-shadow:0 0 60px rgba(232,113,138,.15),0 12px 40px rgba(0,0,0,.45);}
+.card-title{font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--rose-bright);margin-bottom:10px;font-style:italic;text-shadow:0 0 12px rgba(255,157,179,.25);}
+.card-body{color:#d4b0c0;font-size:.97rem;line-height:1.85;}
+.card-body strong{color:var(--rose-pale);}
+
+/* ── SKILLS ── */
+.skills-grid{display:flex;flex-wrap:wrap;gap:12px;}
+.skill-chip{
+  background:rgba(24,9,26,.9);border:1px solid var(--border);color:#e0c0d0;
+  padding:9px 22px;border-radius:25px;font-family:'Lato',sans-serif;
+  font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  transition:all .35s;position:relative;overflow:hidden;
+}
+.skill-chip::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(232,113,138,.18),rgba(200,160,216,.12));opacity:0;transition:opacity .3s;border-radius:25px;}
+.skill-chip:hover{border-color:var(--rose);color:var(--rose-bright);box-shadow:0 0 25px rgba(232,113,138,.35),inset 0 0 14px rgba(232,113,138,.08);transform:translateY(-4px) scale(1.07);}
+.skill-chip:hover::before{opacity:1;}
+.skill-chip.soft{border-color:rgba(200,160,216,.4);color:var(--lavender);}
+.skill-chip.soft:hover{border-color:var(--lavender-bright);color:var(--lavender-bright);box-shadow:0 0 25px rgba(200,160,216,.35);}
+
+/* ── TIMELINE ── */
+.timeline{position:relative;padding-left:40px;}
+.timeline::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:1px;background:linear-gradient(to bottom,var(--rose),var(--lavender),transparent);}
+.timeline-item{position:relative;margin-bottom:32px;}
+.timeline-item::before{content:'✿';position:absolute;left:-34px;top:3px;font-size:14px;color:var(--rose);filter:drop-shadow(0 0 8px var(--rose));animation:flowerSpin 8s linear infinite;}
+.timeline-item h3{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:#f0e0ea;margin-bottom:5px;}
+.timeline-item p{color:var(--muted);font-size:.92rem;}
+
+/* ── ACHIEVEMENTS ── */
+.achievement-list{list-style:none;}
+.achievement-list li{display:flex;align-items:flex-start;gap:13px;color:#c8a0b5;padding:13px 0;border-bottom:1px solid rgba(74,31,56,.5);font-size:.97rem;line-height:1.7;}
+.achievement-list li:last-child{border-bottom:none;}
+.achievement-list li::before{content:'❀';font-size:.9rem;flex-shrink:0;margin-top:3px;color:var(--rose);filter:drop-shadow(0 0 5px var(--rose));}
+
+/* ── PROFILE LINKS ── */
+.link-row{display:flex;flex-wrap:wrap;gap:14px;}
+.profile-link{display:inline-flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);color:var(--lavender);padding:12px 24px;border-radius:25px;text-decoration:none;font-family:'Lato',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transition:all .35s;}
+.profile-link:hover{background:rgba(232,113,138,.12);border-color:var(--rose);color:var(--rose-bright);box-shadow:0 0 28px rgba(232,113,138,.25);transform:translateY(-4px);}
+
+/* ── CONTACT ── */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+.contact-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px 16px;text-align:center;text-decoration:none;transition:all .45s;position:relative;overflow:hidden;}
+.contact-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(232,113,138,.16),transparent 65%);opacity:0;transition:opacity .4s;}
+.contact-card:hover::before{opacity:1;}
+.contact-card:hover{border-color:var(--rose);box-shadow:0 0 45px rgba(232,113,138,.2);transform:translateY(-6px);}
+.contact-icon{font-size:24px;margin-bottom:10px;}
+.contact-label{font-size:10px;letter-spacing:.28em;color:var(--muted);text-transform:uppercase;margin-bottom:7px;font-weight:700;}
+.contact-value{font-size:12px;color:var(--rose-bright);word-break:break-all;}
+
+/* ── TESTIMONIALS ── */
+.testimonial{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--rose);border-radius:18px;padding:34px;position:relative;transition:all .4s;}
+.testimonial::before{content:'"';font-family:'Playfair Display',serif;font-size:8rem;color:rgba(232,113,138,.1);position:absolute;top:-16px;left:20px;line-height:1;}
+.testimonial:hover{border-color:rgba(232,113,138,.5);box-shadow:0 0 40px rgba(232,113,138,.1);}
+.testimonial p{color:#caa8b8;font-family:'Cormorant Garamond',serif;font-size:1.2rem;line-height:1.9;font-style:italic;}
+.testimonial cite{display:block;margin-top:16px;color:var(--rose);font-size:.88rem;font-style:normal;font-family:'Lato',sans-serif;font-weight:700;letter-spacing:.12em;}
+
+/* ── STATS ── */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px;}
+@media(max-width:600px){.stat-row{grid-template-columns:1fr 1fr;}.two-col{grid-template-columns:1fr;}}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px 16px;text-align:center;transition:all .4s;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 100%,rgba(232,113,138,.1),transparent 60%);opacity:0;transition:opacity .4s;}
+.stat-card:hover::before{opacity:1;}
+.stat-card:hover{border-color:var(--rose);box-shadow:0 0 35px rgba(232,113,138,.18);transform:translateY(-5px);}
+.stat-number{font-family:'Playfair Display',serif;font-size:2.1rem;font-weight:900;background:linear-gradient(135deg,var(--rose-bright),var(--lavender-bright));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.15em;margin-top:6px;font-weight:700;}
+
+/* ── CERTS ── */
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+.cert-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px 16px;text-align:center;transition:all .4s;position:relative;overflow:hidden;}
+.cert-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--rose),var(--lavender),transparent);opacity:0;transition:opacity .3s;}
+.cert-card:hover{border-color:rgba(232,113,138,.55);box-shadow:0 0 40px rgba(232,113,138,.14);transform:translateY(-6px);}
+.cert-card:hover::after{opacity:1;}
+.cert-icon{font-size:2rem;margin-bottom:12px;}
+.cert-name{color:var(--rose-bright);font-family:'Lato',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;}
+.cert-sub{color:var(--muted);font-size:11px;margin-top:6px;letter-spacing:.1em;text-transform:uppercase;}
+
+/* ── HOBBIES ── */
+.hobby-tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
+.hobby-tag{background:rgba(200,160,216,.09);border:1px solid rgba(200,160,216,.35);color:var(--lavender);padding:8px 20px;border-radius:20px;font-family:'Dancing Script',cursive;font-size:15px;transition:all .3s;}
+.hobby-tag:hover{background:rgba(200,160,216,.2);border-color:var(--lavender-bright);color:var(--lavender-bright);transform:scale(1.08) translateY(-2px);}
+
+/* ── FLOATING DECOR ROSES ── */
+#floatrose1,#floatrose2{position:fixed;z-index:3;pointer-events:none;opacity:.8;transition:filter .3s;}
+
+/* Mobile nav toggle */
+#nav-toggle{display:none;position:fixed;top:14px;right:16px;z-index:1100;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:8px 16px;color:var(--rose);font-size:17px;}
+@media(max-width:820px){
+  #float-nav{display:none;right:0;top:0;transform:none;background:#0f0810ee;padding:70px 18px 20px;height:100vh;width:185px;flex-direction:column;gap:7px;border-left:1px solid var(--border);border-radius:0;}
+  #float-nav.open{display:flex;}
+  #nav-toggle{display:block;}
+  .nav-label{display:none;}
+}
+
+footer{text-align:center;padding:50px 20px;color:var(--muted);font-size:12px;border-top:1px solid var(--border);position:relative;z-index:2;font-family:'Lato',sans-serif;font-weight:700;letter-spacing:.25em;text-transform:uppercase;}
+footer span{color:var(--rose);}
+
+/* RIPPLE */
+.ripple-container{position:relative;overflow:hidden;}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,157,179,.35);transform:scale(0);animation:rippleAnim .7s linear;pointer-events:none;}
+@keyframes rippleAnim{to{transform:scale(4);opacity:0;}}
+
+/* PARTICLE BURST canvas overlay */
+#burst-canvas{position:fixed;inset:0;z-index:9997;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<!-- CURSORS -->
+<div id="cur">
+  <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="10" cy="10" r="4" fill="#ff9db3"/>
+    <ellipse cx="10" cy="4" rx="3" ry="4" fill="rgba(255,157,179,.65)" transform="rotate(0,10,10)"/>
+    <ellipse cx="10" cy="4" rx="3" ry="4" fill="rgba(255,157,179,.65)" transform="rotate(72,10,10)"/>
+    <ellipse cx="10" cy="4" rx="3" ry="4" fill="rgba(255,157,179,.65)" transform="rotate(144,10,10)"/>
+    <ellipse cx="10" cy="4" rx="3" ry="4" fill="rgba(255,157,179,.65)" transform="rotate(216,10,10)"/>
+    <ellipse cx="10" cy="4" rx="3" ry="4" fill="rgba(255,157,179,.65)" transform="rotate(288,10,10)"/>
+  </svg>
+</div>
+<div id="trail"></div>
+
+<canvas id="bg-canvas"></canvas>
+<canvas id="petal-canvas"></canvas>
+<canvas id="burst-canvas"></canvas>
+
+<!-- FLOATING DECOR ROSES -->
+<svg id="floatrose1" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" style="width:90px;height:90px;position:fixed;z-index:3;pointer-events:none;">
+  <defs><radialGradient id="rg1" cx="50%" cy="50%"><stop offset="0%" stop-color="#ff9db3"/><stop offset="100%" stop-color="#7b3f5e"/></radialGradient></defs>
+  <circle cx="45" cy="45" r="18" fill="url(#rg1)" opacity=".9"/>
+  <ellipse cx="45" cy="20" rx="12" ry="18" fill="#e8718a" opacity=".75" transform="rotate(0,45,45)"/>
+  <ellipse cx="45" cy="20" rx="12" ry="18" fill="#c8a0d8" opacity=".65" transform="rotate(60,45,45)"/>
+  <ellipse cx="45" cy="20" rx="12" ry="18" fill="#e8718a" opacity=".7" transform="rotate(120,45,45)"/>
+  <ellipse cx="45" cy="20" rx="12" ry="18" fill="#c8a0d8" opacity=".65" transform="rotate(180,45,45)"/>
+  <ellipse cx="45" cy="20" rx="12" ry="18" fill="#e8718a" opacity=".7" transform="rotate(240,45,45)"/>
+  <ellipse cx="45" cy="20" rx="12" ry="18" fill="#c8a0d8" opacity=".65" transform="rotate(300,45,45)"/>
+  <circle cx="45" cy="45" r="10" fill="#ff9db3"/>
+  <circle cx="45" cy="45" r="5" fill="#fff0f5" opacity=".6"/>
+</svg>
+<svg id="floatrose2" viewBox="0 0 65 65" xmlns="http://www.w3.org/2000/svg" style="width:65px;height:65px;position:fixed;z-index:3;pointer-events:none;">
+  <defs><radialGradient id="rg2" cx="50%" cy="50%"><stop offset="0%" stop-color="#c8a0d8"/><stop offset="100%" stop-color="#7b3f5e"/></radialGradient></defs>
+  <circle cx="32" cy="32" r="13" fill="url(#rg2)"/>
+  <ellipse cx="32" cy="14" rx="9" ry="14" fill="#c8a0d8" opacity=".7" transform="rotate(0,32,32)"/>
+  <ellipse cx="32" cy="14" rx="9" ry="14" fill="#e8718a" opacity=".65" transform="rotate(72,32,32)"/>
+  <ellipse cx="32" cy="14" rx="9" ry="14" fill="#c8a0d8" opacity=".7" transform="rotate(144,32,32)"/>
+  <ellipse cx="32" cy="14" rx="9" ry="14" fill="#e8718a" opacity=".65" transform="rotate(216,32,32)"/>
+  <ellipse cx="32" cy="14" rx="9" ry="14" fill="#c8a0d8" opacity=".7" transform="rotate(288,32,32)"/>
+  <circle cx="32" cy="32" r="7" fill="#e0c0f0"/>
+  <circle cx="32" cy="32" r="3" fill="#fff0f5" opacity=".7"/>
+</svg>
+
+<!-- NAV -->
+<button id="nav-toggle" onclick="document.getElementById('float-nav').classList.toggle('open')">☰</button>
+<nav id="float-nav">
+  <a href="#hero" class="nav-dot active"><span class="icon">🏠</span><span class="nav-label">Home</span><span class="nav-pip"></span></a>
+  <a href="#about" class="nav-dot"><span class="icon">🌸</span><span class="nav-label">About</span><span class="nav-pip"></span></a>
+  <a href="#education" class="nav-dot"><span class="icon">📚</span><span class="nav-label">Education</span><span class="nav-pip"></span></a>
+  <a href="#skills" class="nav-dot"><span class="icon">✦</span><span class="nav-label">Skills</span><span class="nav-pip"></span></a>
+  <a href="#projects" class="nav-dot"><span class="icon">💡</span><span class="nav-label">Projects</span><span class="nav-pip"></span></a>
+  <a href="#internships" class="nav-dot"><span class="icon">💼</span><span class="nav-label">Experience</span><span class="nav-pip"></span></a>
+  <a href="#achievements" class="nav-dot"><span class="icon">🏆</span><span class="nav-label">Achievements</span><span class="nav-pip"></span></a>
+  <a href="#certifications" class="nav-dot"><span class="icon">📜</span><span class="nav-label">Certifications</span><span class="nav-pip"></span></a>
+  <a href="#hobbies" class="nav-dot"><span class="icon">🎨</span><span class="nav-label">Interests</span><span class="nav-pip"></span></a>
+  <a href="#profiles" class="nav-dot"><span class="icon">🔗</span><span class="nav-label">Profiles</span><span class="nav-pip"></span></a>
+  <a href="#testimonials" class="nav-dot"><span class="icon">💬</span><span class="nav-label">Testimonials</span><span class="nav-pip"></span></a>
+  <a href="#contact" class="nav-dot"><span class="icon">✉️</span><span class="nav-label">Contact</span><span class="nav-pip"></span></a>
+</nav>
+
+<!-- ══ HERO ══ -->
+<div id="hero">
+  <div class="photo-frame" id="photoFrame">
+    <div class="photo-inner" id="photoInner" title="Click to upload your photo">
+      <div class="photo-placeholder">🌸</div>
+    </div>
+    <div class="ring1"></div><div class="ring2"></div><div class="ring3"></div>
+    <div class="photo-glow"></div>
+  </div>
+  <div class="hero-wrapper">
+    <p class="hero-tag">BBA Student · Creative Thinker · Future Leader</p>
+    <h1 class="hero-name">
+      Bhumika Gaur
+      <span>Khalsa College for Women, Ludhiana</span>
+    </h1>
+    <p class="hero-title">Turning ideas into impact, one strategy at a time.</p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn-primary ripple-container">✦ View My Work</a>
+      <a href="#contact" class="btn-ghost ripple-container">Let's Connect</a>
+    </div>
+  </div>
+  <div class="scroll-hint"><span>Discover</span><div class="scroll-line"></div></div>
+</div>
+
+<!-- ══ ABOUT ══ -->
+<section id="about">
+  <div class="reveal">
+    <p class="section-label">01 — About Me</p>
+    <h2 class="section-title">Hello, I'm Bhumika ✦</h2>
+    <div class="divider"></div>
+    <div class="card ripple-container">
+      <p class="card-body">I am currently pursuing my <strong>Bachelor of Business Administration (BBA)</strong> from Khalsa College for Women, Ludhiana — one of Punjab's most prestigious institutions. With a keen eye for detail and a passion for people and business, I am building a strong foundation in management, marketing, and entrepreneurship. I believe in combining creativity with strategy to solve real-world challenges.</p>
+    </div>
+    <div class="card ripple-container">
+      <p class="card-title">Career Objective</p>
+      <p class="card-body">To secure a dynamic role in a progressive organization where I can leverage my business knowledge, communication skills, and creative thinking to contribute meaningfully — while continuing to grow personally and professionally.</p>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card stagger-child"><div class="stat-number">BBA</div><div class="stat-label">Degree in Progress</div></div>
+      <div class="stat-card stagger-child"><div class="stat-number">2+</div><div class="stat-label">Live Projects</div></div>
+      <div class="stat-card stagger-child"><div class="stat-number">∞</div><div class="stat-label">Ambition & Drive</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ EDUCATION ══ -->
+<section id="education">
+  <div class="reveal">
+    <p class="section-label">02 — Education</p>
+    <h2 class="section-title">Academic Journey</h2>
+    <div class="divider"></div>
+    <div class="timeline">
+      <div class="timeline-item stagger-child">
+        <h3>Bachelor of Business Administration (BBA)</h3>
+        <p>Khalsa College for Women, Ludhiana · 2023 – Present</p>
+      </div>
+      <div class="timeline-item stagger-child">
+        <h3>12th Grade — Commerce Stream</h3>
+        <p>Mahindra Public School, Bathinda · 2023</p>
+      </div>
+      <div class="timeline-item stagger-child">
+        <h3>10th Grade</h3>
+        <p>Green Valley Public School, Moga · 2021</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SKILLS ══ -->
+<section id="skills">
+  <div class="reveal">
+    <p class="section-label">03 — Skills</p>
+    <h2 class="section-title">What I Bring to the Table</h2>
+    <div class="divider"></div>
+    <div class="skills-grid">
+      <span class="skill-chip stagger-child">MS Excel</span>
+      <span class="skill-chip stagger-child">MS Office Suite</span>
+      <span class="skill-chip stagger-child">Canva</span>
+      <span class="skill-chip stagger-child">Social Media Marketing</span>
+      <span class="skill-chip stagger-child">Market Research</span>
+      <span class="skill-chip stagger-child">Business Communication</span>
+      <span class="skill-chip stagger-child">Data Entry & Analysis</span>
+      <span class="skill-chip stagger-child">Tally (Basic)</span>
+      <span class="skill-chip stagger-child">Content Writing</span>
+      <span class="skill-chip stagger-child">Digital Marketing</span>
+    </div>
+    <div style="margin-top:42px">
+      <p class="section-label" style="margin-bottom:16px">Soft Skills</p>
+      <div class="skills-grid">
+        <span class="skill-chip soft stagger-child">Public Speaking</span>
+        <span class="skill-chip soft stagger-child">Leadership</span>
+        <span class="skill-chip soft stagger-child">Team Collaboration</span>
+        <span class="skill-chip soft stagger-child">Creative Thinking</span>
+        <span class="skill-chip soft stagger-child">Time Management</span>
+        <span class="skill-chip soft stagger-child">Adaptability</span>
+        <span class="skill-chip soft stagger-child">Emotional Intelligence</span>
+        <span class="skill-chip soft stagger-child">Problem Solving</span>
+      </div>
+    </div>
+    <div style="margin-top:42px">
+      <p class="section-label" style="margin-bottom:16px">Languages Known</p>
+      <div class="skills-grid">
+        <span class="skill-chip stagger-child" style="border-color:rgba(200,160,216,.4);color:#e8d0f8">English</span>
+        <span class="skill-chip stagger-child" style="border-color:rgba(200,160,216,.4);color:#e8d0f8">Hindi</span>
+        <span class="skill-chip stagger-child" style="border-color:rgba(200,160,216,.4);color:#e8d0f8">Punjabi</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PROJECTS ══ -->
+<section id="projects">
+  <div class="reveal">
+    <p class="section-label">04 — Projects</p>
+    <h2 class="section-title">Projects & Work</h2>
+    <div class="divider"></div>
+    <div class="card ripple-container">
+      <p class="card-title">✦ Market Research Study — Consumer Buying Behaviour</p>
+      <p class="card-body">Conducted an in-depth study on consumer purchasing patterns in the FMCG sector among college-going women in Ludhiana. Designed questionnaires, collected data from 100+ respondents, analyzed results using Excel, and presented actionable insights in a structured business report. Identified key factors influencing buying decisions including social media influence and peer recommendations.</p>
+    </div>
+    <div class="card ripple-container">
+      <p class="card-title">✦ Business Plan — Campus Startup Pitch</p>
+      <p class="card-body">Developed a comprehensive business plan for a sustainable handmade accessories startup targeting college students. Covered market analysis, pricing strategy, target audience profiling, and a go-to-market plan. Pitched to a panel of faculty judges and was shortlisted among the top 5 ideas in the college entrepreneurship competition.</p>
+    </div>
+    <div class="card ripple-container">
+      <p class="card-title">✦ Digital Marketing Campaign — Canva & Instagram</p>
+      <p class="card-body">Designed a fully planned Instagram-based marketing campaign for a college cultural event, including branded posters, story templates, and engagement posts using Canva. The campaign resulted in a 40% increase in RSVPs compared to the previous year's event. Combined design sensibility with social media strategy for measurable results.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ INTERNSHIPS ══ -->
+<section id="internships">
+  <div class="reveal">
+    <p class="section-label">05 — Experience</p>
+    <h2 class="section-title">Internships & Training</h2>
+    <div class="divider"></div>
+    <div class="card ripple-container">
+      <p class="card-title">✦ Marketing Intern — Local Retail Business, Ludhiana</p>
+      <p class="card-body">Assisted the marketing team with managing social media handles, creating promotional content on Canva, and responding to customer queries online. Gained hands-on experience in brand communication, content scheduling, and basic analytics. Contributed to a visible uptick in social media engagement over the internship period.</p>
+    </div>
+    <div class="card ripple-container">
+      <p class="card-title">✦ Volunteer Coordinator — NGO Awareness Drive</p>
+      <p class="card-body">Organized and coordinated an awareness campaign on women's education in collaboration with a local NGO. Managed a team of 15 volunteers, handled scheduling and communications, and helped craft outreach materials. The event reached over 300 community members and was recognized by the institution for social impact.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ACHIEVEMENTS ══ -->
+<section id="achievements">
+  <div class="reveal">
+    <p class="section-label">06 — Achievements</p>
+    <h2 class="section-title">Milestones & Honours</h2>
+    <div class="divider"></div>
+    <ul class="achievement-list">
+      <li class="stagger-child">Shortlisted in Top 5 — College Entrepreneurship Business Pitch Competition</li>
+      <li class="stagger-child">Best Volunteer Award — NGO Women's Education Awareness Campaign</li>
+      <li class="stagger-child">Class Representative — bridging communication between students and faculty</li>
+      <li class="stagger-child">Event Head — cultural committee for inter-college fest at Khalsa College</li>
+      <li class="stagger-child">Consistent academic performer — maintaining strong CGPA throughout BBA</li>
+      <li class="stagger-child">Organized & led team of 15 for campus social responsibility drive</li>
+      <li class="stagger-child">Active member — Entrepreneurship Development Cell (EDC), Khalsa College</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══ CERTIFICATIONS ══ -->
+<section id="certifications">
+  <div class="reveal">
+    <p class="section-label">07 — Certifications</p>
+    <h2 class="section-title">Certifications & Courses</h2>
+    <div class="divider"></div>
+    <div class="cert-grid">
+      <div class="cert-card stagger-child"><div class="cert-icon">📊</div><div class="cert-name">Digital Marketing Fundamentals</div><div class="cert-sub">Google / Coursera</div></div>
+      <div class="cert-card stagger-child"><div class="cert-icon">🎨</div><div class="cert-name">Canva Design Essentials</div><div class="cert-sub">Canva Learn</div></div>
+      <div class="cert-card stagger-child"><div class="cert-icon">📈</div><div class="cert-name">MS Excel for Business</div><div class="cert-sub">LinkedIn Learning</div></div>
+      <div class="cert-card stagger-child"><div class="cert-icon">💬</div><div class="cert-name">Business Communication</div><div class="cert-sub">NPTEL / Swayam</div></div>
+      <div class="cert-card stagger-child"><div class="cert-icon">🌐</div><div class="cert-name">Social Media Marketing</div><div class="cert-sub">HubSpot Academy</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOBBIES ══ -->
+<section id="hobbies">
+  <div class="reveal">
+    <p class="section-label">08 — Beyond Academics</p>
+    <h2 class="section-title">Interests & Hobbies</h2>
+    <div class="divider"></div>
+    <div class="card ripple-container">
+      <p class="card-body">Outside the classroom, I find joy in creative expression and continuous self-growth. My interests span from art and design to reading and cultural exploration — each hobby adding a new dimension to how I think and work.</p>
+    </div>
+    <div class="hobby-tags">
+      <span class="hobby-tag stagger-child">🎨 Sketching & Art</span>
+      <span class="hobby-tag stagger-child">📖 Reading</span>
+      <span class="hobby-tag stagger-child">✍️ Creative Writing</span>
+      <span class="hobby-tag stagger-child">🎭 Cultural Events</span>
+      <span class="hobby-tag stagger-child">🌸 Fashion & Styling</span>
+      <span class="hobby-tag stagger-child">📸 Photography</span>
+      <span class="hobby-tag stagger-child">🎵 Music</span>
+      <span class="hobby-tag stagger-child">🌿 Nature Walks</span>
+      <span class="hobby-tag stagger-child">🍳 Cooking</span>
+      <span class="hobby-tag stagger-child">💡 Entrepreneurship Blogs</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PROFILES ══ -->
+<section id="profiles">
+  <div class="reveal">
+    <p class="section-label">09 — Online Presence</p>
+    <h2 class="section-title">Find Me Online</h2>
+    <div class="divider"></div>
+    <div class="link-row">
+      <a href="#" class="profile-link ripple-container">💼 LinkedIn</a>
+      <!-- <a href="#" class="profile-link ripple-container">🐙 GitHub</a> -->
+      <a href="https://www.instagram.com/edit.and.ink_?igsh=eHBoMTl4OXpwZHAx" class="profile-link ripple-container">📸 Instagram</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIALS ══ -->
+<section id="testimonials">
+  <div class="reveal">
+    <p class="section-label">10 — Testimonials</p>
+    <h2 class="section-title">What People Say</h2>
+    <div class="divider"></div>
+    <div class="testimonial stagger-child">
+      <p>Bhumika is a highly motivated and responsible student. Her leadership during college events and her dedication to every task she undertakes sets her apart. She brings both discipline and creativity — a rare combination.</p>
+      <cite>— Faculty Mentor, Khalsa College for Women</cite>
+    </div>
+    <div class="testimonial stagger-child" style="margin-top:18px">
+      <p>Working alongside Bhumika during our college project was an absolute pleasure. She is organized, thoughtful, and always finds the most elegant solution. Her energy lifts the entire team.</p>
+      <cite>— Fellow BBA Student & Project Partner</cite>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONTACT ══ -->
+<section id="contact">
+  <div class="reveal">
+    <p class="section-label">11 — Contact</p>
+    <h2 class="section-title">Get In Touch ✦</h2>
+    <div class="divider"></div>
+    <div class="contact-grid">
+      <a href="mailto:harshitgarg0106@gmail.com" class="contact-card ripple-container">
+        <div class="contact-icon">✉️</div>
+        <p class="contact-label">Email</p>
+        <p class="contact-value">bhumikagaur218@gmail.com</p>
+      </a>
+      <a href="tel:7901718737" class="contact-card ripple-container">
+        <div class="contact-icon">📞</div>
+        <p class="contact-label">Phone</p>
+        <p class="contact-value">+91 62838-29544</p>
+      </a>
+      <!-- <a href="https://github.com/harshitgarg2006" target="_blank" class="contact-card ripple-container">
+        <div class="contact-icon">🐙</div>
+        <p class="contact-label">GitHub</p>
+        <p class="contact-value">harshitgarg2006</p>
+      </a> -->
+      <a href="https://www.linkedin.com/in/bhumika-gaur-15b1083a8?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" class="contact-card ripple-container">
+        <div class="contact-icon">💼</div>
+        <p class="contact-label">LinkedIn</p>
+        <p class="contact-value">Bhumika Gaur</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 <span>Bhumika Gaur</span> · Portfolio · Crafted with ❀ & Passion</footer>
+
+<script>
+// ══ CURSOR ══
+const curEl=document.getElementById('cur'),trailEl=document.getElementById('trail');
+let mx=innerWidth/2,my=innerHeight/2,tx=mx,ty=my;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function animCur(){
+  curEl.style.left=mx+'px';curEl.style.top=my+'px';
+  tx+=(mx-tx)*.1;ty+=(my-ty)*.1;
+  trailEl.style.left=tx+'px';trailEl.style.top=ty+'px';
+  requestAnimationFrame(animCur);
+})();
+document.querySelectorAll('a,button,.card,.skill-chip,.nav-dot,.cert-card,.contact-card,.stat-card,.photo-frame').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{trailEl.style.width='62px';trailEl.style.height='62px';trailEl.style.borderColor='rgba(232,113,138,.9)';trailEl.style.borderRadius='30%';});
+  el.addEventListener('mouseleave',()=>{trailEl.style.width='44px';trailEl.style.height='44px';trailEl.style.borderColor='rgba(232,113,138,.55)';trailEl.style.borderRadius='50%';});
+});
+
+// ══ CARD 3D TILT + MAGNETIC PUSH ══
+document.querySelectorAll('.card,.cert-card,.stat-card,.contact-card,.testimonial').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const cx=e.clientX-r.left,cy=e.clientY-r.top;
+    const px=cx/r.width,py=cy/r.height;
+    const rotX=(py-.5)*-14;const rotY=(px-.5)*14;
+    card.style.transform=`perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-6px) scale(1.015)`;
+    // moving glow follows cursor
+    card.style.setProperty('--mx',(px*100)+'%');
+    card.style.setProperty('--my',(py*100)+'%');
+  });
+  card.addEventListener('mouseleave',()=>{
+    card.style.transform='';
+    card.style.transition='transform .6s cubic-bezier(.23,1,.32,1),box-shadow .45s,border-color .45s';
+  });
+  card.addEventListener('mouseenter',()=>{
+    card.style.transition='box-shadow .45s,border-color .45s';
+  });
+});
+
+// ══ PHOTO MAGNETIC PUSH ══
+const photoFrame=document.getElementById('photoFrame');
+photoFrame.addEventListener('mousemove',e=>{
+  const r=photoFrame.getBoundingClientRect();
+  const cx=e.clientX-r.left-r.width/2,cy=e.clientY-r.top-r.height/2;
+  photoFrame.style.transform=`translate(${cx*.12}px,${cy*.12}px) scale(1.08)`;
+});
+photoFrame.addEventListener('mouseleave',()=>{
+  photoFrame.style.transform='';
+  photoFrame.style.transition='transform .6s cubic-bezier(.23,1,.32,1)';
+});
+
+// ══ RIPPLE ON CLICK ══
+document.querySelectorAll('.ripple-container').forEach(el=>{
+  el.addEventListener('click',e=>{
+    const r=el.getBoundingClientRect();
+    const ripple=document.createElement('span');
+    ripple.classList.add('ripple');
+    const size=Math.max(r.width,r.height)*2;
+    ripple.style.width=ripple.style.height=size+'px';
+    ripple.style.left=(e.clientX-r.left-size/2)+'px';
+    ripple.style.top=(e.clientY-r.top-size/2)+'px';
+    el.appendChild(ripple);
+    setTimeout(()=>ripple.remove(),700);
+  });
+});
+
+// ══ BG CANVAS ══
+const bgC=document.getElementById('bg-canvas'),bgX=bgC.getContext('2d');
+let W,H;
+function resizeBg(){W=bgC.width=innerWidth;H=bgC.height=innerHeight;}
+resizeBg();window.addEventListener('resize',resizeBg);
+let mouseNX=.5,mouseNY=.5;
+document.addEventListener('mousemove',e=>{mouseNX=e.clientX/W;mouseNY=e.clientY/H;});
+const STARS=Array.from({length:220},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.4+.2,alpha:Math.random()*.5+.1,phase:Math.random()*Math.PI*2,speed:Math.random()*.018+.004}));
+const FLOATERS=Array.from({length:70},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*2.5+.6,alpha:Math.random()*.5+.1,color:['232,113,138','200,160,216','247,207,216','255,157,179'][Math.floor(Math.random()*4)]}));
+function drawBg(){
+  bgX.clearRect(0,0,W,H);
+  const gx=mouseNX*W,gy=mouseNY*H;
+  let neb=bgX.createRadialGradient(gx,gy,0,gx,gy,450);
+  neb.addColorStop(0,'rgba(123,63,94,.24)');neb.addColorStop(.5,'rgba(80,20,50,.1)');neb.addColorStop(1,'transparent');
+  bgX.fillStyle=neb;bgX.fillRect(0,0,W,H);
+  let neb2=bgX.createRadialGradient((1-mouseNX)*W,(1-mouseNY)*H,0,(1-mouseNX)*W,(1-mouseNY)*H,320);
+  neb2.addColorStop(0,'rgba(200,160,216,.12)');neb2.addColorStop(1,'transparent');
+  bgX.fillStyle=neb2;bgX.fillRect(0,0,W,H);
+  [{x:.05*W,y:.08*H,c:'232,113,138',r:240},{x:.92*W,y:.85*H,c:'200,160,216',r:220}].forEach(c=>{
+    let g=bgX.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
+    g.addColorStop(0,`rgba(${c.c},.12)`);g.addColorStop(1,'transparent');
+    bgX.fillStyle=g;bgX.fillRect(0,0,W,H);
+  });
+  STARS.forEach(s=>{
+    s.phase+=s.speed;
+    const a=s.alpha*(.5+.5*Math.sin(s.phase));
+    bgX.beginPath();bgX.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);
+    bgX.fillStyle=`rgba(255,220,235,${a})`;bgX.fill();
+  });
+  const cxW=mouseNX*W,cyH=mouseNY*H;
+  FLOATERS.forEach(p=>{
+    const dx=cxW-p.x,dy=cyH-p.y,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<220){p.vx+=dx/d*.04;p.vy+=dy/d*.04;}
+    p.vx*=.97;p.vy*=.97;p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    bgX.beginPath();bgX.arc(p.x,p.y,p.r,0,Math.PI*2);
+    bgX.fillStyle=`rgba(${p.color},${p.alpha})`;bgX.fill();
+  });
+  for(let i=0;i<FLOATERS.length;i++){for(let j=i+1;j<FLOATERS.length;j++){
+    const dx=FLOATERS[i].x-FLOATERS[j].x,dy=FLOATERS[i].y-FLOATERS[j].y,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<105){bgX.beginPath();bgX.moveTo(FLOATERS[i].x,FLOATERS[i].y);bgX.lineTo(FLOATERS[j].x,FLOATERS[j].y);bgX.strokeStyle=`rgba(232,113,138,${.13*(1-d/105)})`;bgX.lineWidth=.5;bgX.stroke();}
+  }}
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+// ══ PETAL CANVAS ══
+const pC=document.getElementById('petal-canvas'),pX=pC.getContext('2d');
+function resizePetal(){pC.width=innerWidth;pC.height=innerHeight;}
+resizePetal();window.addEventListener('resize',resizePetal);
+const PETALS=Array.from({length:30},()=>spawnPetal(true));
+function spawnPetal(init){return{x:Math.random()*innerWidth,y:init?Math.random()*innerHeight:-20,size:Math.random()*14+6,vx:(Math.random()-.5)*.7,vy:Math.random()*1.2+.5,rot:Math.random()*Math.PI*2,rotSpeed:(Math.random()-.5)*.035,alpha:Math.random()*.5+.2,color:['232,113,138','247,207,216','200,160,216','255,157,179','240,180,200'][Math.floor(Math.random()*5)],sway:Math.random()*Math.PI*2,swaySpeed:Math.random()*.02+.008};}
+function drawPetal(ctx,x,y,size,rot){ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.beginPath();ctx.moveTo(0,-size);ctx.bezierCurveTo(size*.6,-size*.5,size*.6,size*.5,0,size);ctx.bezierCurveTo(-size*.6,size*.5,-size*.6,-size*.5,0,-size);ctx.closePath();ctx.fill();ctx.restore();}
+function animPetals(){
+  pX.clearRect(0,0,pC.width,pC.height);
+  const mxR=mx/innerWidth;
+  PETALS.forEach((p,i)=>{
+    p.sway+=p.swaySpeed;p.x+=p.vx+Math.sin(p.sway)*.5+(mxR-.5)*.18;p.y+=p.vy;p.rot+=p.rotSpeed;
+    if(p.y>innerHeight+30)PETALS[i]=spawnPetal(false);
+    if(p.x<-20)p.x=innerWidth+10;if(p.x>innerWidth+20)p.x=-10;
+    pX.globalAlpha=p.alpha;pX.fillStyle=`rgba(${p.color},.78)`;
+    drawPetal(pX,p.x,p.y,p.size,p.rot);
+  });
+  pX.globalAlpha=1;
+  requestAnimationFrame(animPetals);
+}
+animPetals();
+
+// ══ BURST CANVAS (click particles) ══
+const bC=document.getElementById('burst-canvas'),bX=bC.getContext('2d');
+function resizeBurst(){bC.width=innerWidth;bC.height=innerHeight;}
+resizeBurst();window.addEventListener('resize',resizeBurst);
+let bursts=[];
+document.addEventListener('click',e=>{
+  // Create star burst
+  for(let i=0;i<14;i++){
+    const angle=(i/14)*Math.PI*2;
+    const speed=Math.random()*4+2;
+    bursts.push({x:e.clientX,y:e.clientY,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-.5,size:Math.random()*8+3,life:1,rot:Math.random()*Math.PI*2,rotS:(Math.random()-.5)*.1,color:['232,113,138','247,207,216','200,160,216','255,157,179','255,220,235'][Math.floor(Math.random()*5)]});
+  }
+  // Shockwave ring
+  bursts.push({type:'ring',x:e.clientX,y:e.clientY,r:0,life:1});
+});
+function animBursts(){
+  bX.clearRect(0,0,bC.width,bC.height);
+  bursts=bursts.filter(b=>{
+    if(b.type==='ring'){
+      b.r+=6;b.life-=.045;
+      bX.beginPath();bX.arc(b.x,b.y,b.r,0,Math.PI*2);
+      bX.strokeStyle=`rgba(232,113,138,${b.life*.6})`;bX.lineWidth=2;bX.stroke();
+      return b.life>0;
+    }
+    b.x+=b.vx;b.y+=b.vy;b.vy+=.12;b.rot+=b.rotS;b.life-=.035;
+    bX.globalAlpha=b.life;bX.fillStyle=`rgba(${b.color},.9)`;
+    drawPetal(bX,b.x,b.y,b.size,b.rot);
+    bX.globalAlpha=1;
+    return b.life>0;
+  });
+  requestAnimationFrame(animBursts);
+}
+animBursts();
+
+// ══ FLOATING ROSES — fully cursor-responsive ══
+const fr1=document.getElementById('floatrose1'),fr2=document.getElementById('floatrose2');
+let fr1x=innerWidth*.1,fr1y=innerHeight*.22;
+let fr2x=innerWidth*.88,fr2y=innerHeight*.62;
+let orbitT=0;
+function animRoses(){
+  orbitT+=.007;
+  // Base orbit positions
+  const base1x=innerWidth*.09+Math.cos(orbitT*.8)*65;
+  const base1y=innerHeight*.2+Math.sin(orbitT)*50;
+  const base2x=innerWidth*.89+Math.cos(orbitT*.6+2)*55;
+  const base2y=innerHeight*.64+Math.sin(orbitT*.7)*46;
+  // Cursor attraction
+  const d1x=mx-base1x,d1y=my-base1y,d1=Math.sqrt(d1x*d1x+d1y*d1y);
+  const pull1=Math.max(0,1-d1/350);
+  const t1x=base1x+d1x*pull1*.22;
+  const t1y=base1y+d1y*pull1*.22;
+  fr1x+=(t1x-fr1x)*.06;fr1y+=(t1y-fr1y)*.06;
+  const d2x=mx-base2x,d2y=my-base2y,d2=Math.sqrt(d2x*d2x+d2y*d2y);
+  const pull2=Math.max(0,1-d2/350);
+  const t2x=base2x+d2x*pull2*.18;
+  const t2y=base2y+d2y*pull2*.18;
+  fr2x+=(t2x-fr2x)*.05;fr2y+=(t2y-fr2y)*.05;
+  fr1.style.left=(fr1x-45)+'px';fr1.style.top=(fr1y-45)+'px';
+  fr1.style.transform=`rotate(${Math.sin(orbitT*.9)*22}deg) scale(${1+.07*Math.sin(orbitT*1.3)})`;
+  fr2.style.left=(fr2x-32)+'px';fr2.style.top=(fr2y-32)+'px';
+  fr2.style.transform=`rotate(${Math.cos(orbitT*.7)*18+10}deg) scale(${1+.08*Math.cos(orbitT*1.1)})`;
+  const near1=d1<120,near2=d2<120;
+  fr1.style.filter=near1?'drop-shadow(0 0 32px rgba(255,157,179,1)) drop-shadow(0 0 60px rgba(200,160,216,.9))':'drop-shadow(0 0 16px rgba(232,113,138,.7)) drop-shadow(0 0 32px rgba(200,160,216,.4))';
+  fr2.style.filter=near2?'drop-shadow(0 0 28px rgba(200,160,216,1)) drop-shadow(0 0 55px rgba(255,157,179,.9))':'drop-shadow(0 0 14px rgba(200,160,216,.7)) drop-shadow(0 0 28px rgba(232,113,138,.4))';
+  requestAnimationFrame(animRoses);
+}
+animRoses();
+
+// ══ SCROLL REVEAL — including stagger ══
+const revealEls=document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale');
+const revObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      // Stagger children
+      const children=e.target.querySelectorAll('.stagger-child');
+      children.forEach((c,i)=>{setTimeout(()=>{c.classList.add('visible');},i*90+80);});
+      revObs.unobserve(e.target);
+    }
+  });
+},{threshold:.08});
+revealEls.forEach(r=>revObs.observe(r));
+
+// ══ NAV ACTIVE ══
+const sects=document.querySelectorAll('section,#hero');
+const navDots=document.querySelectorAll('.nav-dot');
+const secObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navDots.forEach(b=>b.classList.remove('active'));
+      const active=document.querySelector(`.nav-dot[href="#${e.target.id}"]`);
+      if(active)active.classList.add('active');
+    }
+  });
+},{threshold:.3});
+sects.forEach(s=>secObs.observe(s));
+
+// ══ PHOTO UPLOAD ══
+const photoInner=document.getElementById('photoInner');
+photoInner.addEventListener('click',()=>{
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+  inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{photoInner.innerHTML=`<img src="${ev.target.result}" alt="Bhumika Gaur" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>`;};r.readAsDataURL(f);};
+  inp.click();
+});
+</script>
+</body>
+</html>
